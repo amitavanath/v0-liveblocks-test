@@ -3,9 +3,11 @@
 import { FileText, LayoutDashboard, Table, PenTool } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useUser } from "@/lib/user-context"
 
 export function TopNav() {
   const pathname = usePathname()
+  const { user, setUserRole } = useUser()
 
   const tabs = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -36,7 +38,27 @@ export function TopNav() {
           })}
         </div>
 
-        <div className="flex items-center gap-2 py-2">
+        <div className="flex items-center gap-4 py-2">
+          <div className="flex items-center gap-2 px-3 py-1 bg-gray-900 rounded-lg border border-gray-800">
+            <span className="text-xs text-gray-400">Role:</span>
+            <button
+              onClick={() => setUserRole(user.role === "tutor" ? "student" : "tutor")}
+              className={`px-2 py-1 text-xs rounded transition-colors ${
+                user.role === "tutor" ? "bg-purple-600 text-white" : "bg-gray-800 text-gray-400 hover:text-white"
+              }`}
+            >
+              Tutor
+            </button>
+            <button
+              onClick={() => setUserRole(user.role === "student" ? "tutor" : "student")}
+              className={`px-2 py-1 text-xs rounded transition-colors ${
+                user.role === "student" ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400 hover:text-white"
+              }`}
+            >
+              Student
+            </button>
+          </div>
+
           <div className="flex -space-x-2">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 border-2 border-black flex items-center justify-center text-xs text-white">
               O

@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 import { ChevronDown, ChevronRight, FileText, Plus, FolderPlus } from "lucide-react"
+import { useUser } from "@/lib/user-context"
 
 interface Document {
   id: string
@@ -44,6 +45,9 @@ export function Sidebar() {
   const [newCourseName, setNewCourseName] = useState("")
   const [addingDocToFolder, setAddingDocToFolder] = useState<string | null>(null)
   const [newDocName, setNewDocName] = useState("")
+
+  const { user } = useUser()
+  const isTutor = user.role === "tutor"
 
   const toggleFolder = (folderId: string) => {
     const newExpanded = new Set(expandedFolders)
@@ -95,52 +99,54 @@ export function Sidebar() {
       </div>
 
       <div className="flex-1 overflow-y-auto py-4">
-        <div className="px-4 mb-4">
-          {!showNewCourseInput ? (
-            <button
-              onClick={() => setShowNewCourseInput(true)}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-900 rounded transition-colors"
-            >
-              <FolderPlus className="w-4 h-4" />
-              <span>Add Course</span>
-            </button>
-          ) : (
-            <div className="flex flex-col gap-2">
-              <input
-                type="text"
-                value={newCourseName}
-                onChange={(e) => setNewCourseName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleAddCourse()
-                  if (e.key === "Escape") {
-                    setShowNewCourseInput(false)
-                    setNewCourseName("")
-                  }
-                }}
-                placeholder="Course name..."
-                className="w-full px-3 py-2 text-sm bg-gray-900 text-white border border-gray-700 rounded focus:outline-none focus:border-gray-600"
-                autoFocus
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={handleAddCourse}
-                  className="flex-1 px-3 py-1 text-xs bg-white text-black rounded hover:bg-gray-200 transition-colors"
-                >
-                  Add
-                </button>
-                <button
-                  onClick={() => {
-                    setShowNewCourseInput(false)
-                    setNewCourseName("")
+        {isTutor && (
+          <div className="px-4 mb-4">
+            {!showNewCourseInput ? (
+              <button
+                onClick={() => setShowNewCourseInput(true)}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-900 rounded transition-colors"
+              >
+                <FolderPlus className="w-4 h-4" />
+                <span>Add Course</span>
+              </button>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <input
+                  type="text"
+                  value={newCourseName}
+                  onChange={(e) => setNewCourseName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleAddCourse()
+                    if (e.key === "Escape") {
+                      setShowNewCourseInput(false)
+                      setNewCourseName("")
+                    }
                   }}
-                  className="flex-1 px-3 py-1 text-xs bg-gray-800 text-white rounded hover:bg-gray-700 transition-colors"
-                >
-                  Cancel
-                </button>
+                  placeholder="Course name..."
+                  className="w-full px-3 py-2 text-sm bg-gray-900 text-white border border-gray-700 rounded focus:outline-none focus:border-gray-600"
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleAddCourse}
+                    className="flex-1 px-3 py-1 text-xs bg-white text-black rounded hover:bg-gray-200 transition-colors"
+                  >
+                    Add
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowNewCourseInput(false)
+                      setNewCourseName("")
+                    }}
+                    className="flex-1 px-3 py-1 text-xs bg-gray-800 text-white rounded hover:bg-gray-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {folders.map((folder) => {
           const isExpanded = expandedFolders.has(folder.id)
@@ -154,7 +160,7 @@ export function Sidebar() {
                   {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                   <span className="text-sm font-medium">{folder.name}</span>
                 </button>
-                {isExpanded && (
+                {isExpanded && isTutor && (
                   <button
                     onClick={() => setAddingDocToFolder(folder.id)}
                     className="p-1 text-gray-400 hover:text-white hover:bg-gray-900 rounded transition-colors"
@@ -209,7 +215,10 @@ export function Sidebar() {
       <div className="mt-auto p-6 border-t border-gray-800">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full" />
-          <span className="text-white text-sm">Stacy</span>
+          <div className="flex flex-col">
+            <span className="text-white text-sm">{user.name}</span>
+            <span className="text-xs text-gray-400 capitalize">{user.role}</span>
+          </div>
         </div>
       </div>
     </div>

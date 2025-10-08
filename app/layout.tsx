@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Sidebar } from "@/components/Sidebar"
 import { TopNav } from "@/components/TopNav"
+import { UserProvider } from "@/lib/user-context"
 import "@liveblocks/react-ui/styles.css"
 import "@liveblocks/react-tiptap/styles.css"
 import "./globals.css"
@@ -20,13 +21,15 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="bg-black text-white">
-        <div className="flex h-screen overflow-hidden">
-          <Sidebar />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <TopNav />
-            <main className="flex-1 overflow-auto">{children}</main>
+        <UserProvider>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <TopNav />
+              <main className="flex-1 overflow-auto">{children}</main>
+            </div>
           </div>
-        </div>
+        </UserProvider>
       </body>
     </html>
   )
