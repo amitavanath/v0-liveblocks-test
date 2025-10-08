@@ -1,12 +1,6 @@
 "use client"
 
-import {
-  useLiveblocksExtension,
-  FloatingToolbar,
-  AnchoredThreads,
-  FloatingComposer,
-  FloatingThreads,
-} from "@liveblocks/react-tiptap"
+import { useLiveblocksExtension, FloatingToolbar, AnchoredThreads, FloatingComposer } from "@liveblocks/react-tiptap"
 import { useThreads } from "@liveblocks/react/suspense"
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
@@ -16,10 +10,10 @@ export function Editor() {
   const { threads } = useThreads({ query: { resolved: false } })
 
   const editor = useEditor({
-    immediatelyRender: false, // Added immediatelyRender: false to fix SSR hydration mismatch
+    immediatelyRender: false,
     editorProps: {
       attributes: {
-        class: "outline-none flex-1 transition-all",
+        class: "outline-none transition-all prose prose-invert max-w-4xl mx-auto px-8 py-8",
       },
     },
     extensions: [
@@ -28,27 +22,54 @@ export function Editor() {
         history: false,
       }),
     ],
+    content: `
+      <h1>Manifesto</h1>
+      <p>Most SaaS products weren't built for the AI era. AI agents can't browse, interact, and collaborate inside apps just like humans—as they become more integrated into products, collaboration isn't just a nice-to-have—it's essential.</p>
+    `,
   })
 
+  const hasThreads = threads && threads.length > 0
+
   if (!editor) {
-    return <div className="p-4">Loading editor...</div>
+    return <div className="p-8 text-gray-400">Loading editor...</div>
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="p-4 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
-        💡 Tip: Select text to see the floating toolbar with comment options
-      </div>
-      <div className="flex gap-4 relative">
-        <div className="flex-1 min-w-0">
-          <EditorContent editor={editor} className="editor" />
+    <div className="h-full flex flex-col bg-black">
+      <div className="border-b border-gray-800 px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-gray-400 text-sm">
+          {/* Formatting toolbar will appear here via FloatingToolbar */}
         </div>
-        <div className="hidden md:block w-80 flex-shrink-0">
-          <AnchoredThreads editor={editor} threads={threads} />
+        <div className="flex items-center gap-2">
+          <div className="flex -space-x-2">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 border-2 border-black flex items-center justify-center text-xs text-white">
+              O
+            </div>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-black flex items-center justify-center text-xs text-white">
+              A
+            </div>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-black flex items-center justify-center text-xs text-white">
+              S
+            </div>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 border-2 border-black flex items-center justify-center text-xs text-white">
+              J
+            </div>
+          </div>
         </div>
       </div>
+
+      <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 overflow-auto p-6">
+          <EditorContent editor={editor} className="h-full" />
+        </div>
+        {hasThreads && (
+          <div className="w-96 border-l border-gray-800 overflow-auto p-4 bg-black">
+            <AnchoredThreads editor={editor} threads={threads} />
+          </div>
+        )}
+      </div>
+
       <FloatingToolbar editor={editor} />
-      <FloatingThreads editor={editor} threads={threads} className="md:hidden" />
       <FloatingComposer editor={editor} />
     </div>
   )
