@@ -1,0 +1,53 @@
+{
+  "name": "collaborative-editor-nextjs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "lint": "next lint",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@eslint/js": "latest",
+    "@liveblocks/client": "latest",
+    "@liveblocks/react": "latest",
+    "@liveblocks/react-tiptap": "latest",
+    "@liveblocks/react-ui": "latest",
+    "@tiptap/core": "latest",
+    "@tiptap/extension-collaboration": "^2.25.0",
+    "@tiptap/extension-collaboration-cursor": "^2.25.0",
+    "@tiptap/pm": "^2.25.0",
+    "@tiptap/react": "latest",
+    "@tiptap/starter-kit": "latest",
+    "@tiptap/suggestion": "^2.25.0",
+    "@vitejs/plugin-react": "5.0.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "eslint": "latest",
+    "eslint-plugin-react-hooks": "latest",
+    "eslint-plugin-react-refresh": "latest",
+    "globals": "latest",
+    "jiti": "latest",
+    "lucide-react": "^0.454.0",
+    "next": "15.2.4",
+    "react": "^19",
+    "react-dom": "^19",
+    "react-router-dom": "7.9.3",
+    "tailwind-merge": "^2.5.5",
+    "tailwindcss-animate": "^1.0.7",
+    "tw-animate-css": "latest",
+    "typescript-eslint": "latest",
+    "vite": "7.1.9",
+    "y-protocols": "^1.0.6",
+    "yjs": "^13.6.19"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "postcss": "^8.5",
+    "tailwindcss": "^4.1.9",
+    "typescript": "^5"
+  }
+}
