@@ -2,15 +2,9 @@
 
 import { useState } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { ArrowLeft, Users, Plus, Settings } from "lucide-react"
+import { ArrowLeft, Users, Plus, Settings, BookOpen, Calendar, User } from "lucide-react"
 import { useUser } from "@/lib/user-context"
-
-interface Student {
-  id: string
-  name: string
-  email: string
-  enrolledAt: string
-}
+import { mockOfferings, mockCourses, mockTerms, mockInstructors, mockEnrollments, mockStudents } from "@/lib/mock-data"
 
 export default function CourseDetailPage() {
   const router = useRouter()
@@ -18,30 +12,37 @@ export default function CourseDetailPage() {
   const { user } = useUser()
   const isTutor = user.role === "tutor"
 
+  const offeringId = params.id as string
+  const offering = mockOfferings.find((o) => o.id === offeringId)
+  const course = mockCourses.find((c) => c.id === offering?.courseId)
+  const term = mockTerms.find((t) => t.id === offering?.termId)
+  const instructor = mockInstructors.find((i) => i.id === offering?.instructorId)
+  const enrollments = mockEnrollments.filter((e) => e.offeringId === offeringId)
+  const enrolledStudents = enrollments.map((enrollment) => {
+    const student = mockStudents.find((s) => s.id === enrollment.studentId)
+    return { ...student, enrollment }
+  })
+
   const [showAddStudent, setShowAddStudent] = useState(false)
   const [studentEmail, setStudentEmail] = useState("")
-  const [students, setStudents] = useState<Student[]>([
-    {
-      id: "1",
-      name: "Alice Johnson",
-      email: "alice@example.com",
-      enrolledAt: "2025-01-20",
-    },
-    {
-      id: "2",
-      name: "Bob Smith",
-      email: "bob@example.com",
-      enrolledAt: "2025-01-22",
-    },
-  ])
 
   const handleAddStudent = () => {
     if (studentEmail.trim()) {
-      // TODO: Add student to course
-      console.log("[v0] Adding student:", studentEmail)
+      // TODO: Add student to course offering
+      console.log("[v0] Adding student to offering:", studentEmail)
       setStudentEmail("")
       setShowAddStudent(false)
     }
+  }
+
+  if (!offering || !course) {
+    return (
+      <div className="flex-1 bg-black text-white p-8">
+        <div className="max-w-6xl mx-auto">
+          <p className="text-gray-400">Course offering not found</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -57,8 +58,32 @@ export default function CourseDetailPage() {
 
         <div className="flex items-start justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Year 7 Maths Extension</h1>
-            <p className="text-gray-400">Advanced mathematics for Year 7 students</p>
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-lg font-mono text-gray-400">{course.code}</span>
+              <span className="px-3 py-1 bg-gray-800 rounded text-sm">Section {offering.section}</span>
+              <span className="px-3 py-1 bg-gray-800 rounded text-sm flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                {term?.name}
+              </span>
+            </div>
+            <h1 className="text-3xl font-bold mb-2">{course.name}</h1>
+            <p className="text-gray-400 mb-4">{course.description}</p>
+            <div className="flex items-center gap-4 text-sm text-gray-400">
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4" />
+                <span>{instructor?.name}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4" />
+                <span>{course.credits} credits</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                <span>
+                  {enrollments.length}/{offering.capacity} enrolled
+                </span>
+              </div>
+            </div>
           </div>
           {isTutor && (
             <button className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors">
@@ -69,11 +94,11 @@ export default function CourseDetailPage() {
         </div>
 
         {/* Students Section */}
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 mb-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5" />
-              <h2 className="text-xl font-semibold">Students ({students.length})</h2>
+              <h2 className="text-xl font-semibold">Enrolled Students ({enrolledStudents.length})</h2>
             </div>
             {isTutor && (
               <button
@@ -81,7 +106,7 @@ export default function CourseDetailPage() {
                 className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors"
               >
                 <Plus className="w-4 h-4" />
-                <span>Add Student</span>
+                <span>Enroll Student</span>
               </button>
             )}
           </div>
@@ -109,7 +134,7 @@ export default function CourseDetailPage() {
                   onClick={handleAddStudent}
                   className="px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  Add
+                  Enroll
                 </button>
                 <button
                   onClick={() => {
@@ -125,31 +150,31 @@ export default function CourseDetailPage() {
           )}
 
           <div className="space-y-3">
-            {students.map((student) => (
-              <div key={student.id} className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
+            {enrolledStudents.map((student) => (
+              <div key={student?.id} className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full" />
                   <div>
-                    <div className="font-medium">{student.name}</div>
-                    <div className="text-sm text-gray-400">{student.email}</div>
+                    <div className="font-medium">{student?.name}</div>
+                    <div className="text-sm text-gray-400">{student?.email}</div>
                   </div>
                 </div>
                 <div className="text-sm text-gray-500">
-                  Enrolled {new Date(student.enrolledAt).toLocaleDateString()}
+                  Enrolled {new Date(student?.enrollment?.enrolledAt || "").toLocaleDateString()}
                 </div>
               </div>
             ))}
           </div>
 
-          {students.length === 0 && (
+          {enrolledStudents.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              No students enrolled yet. {isTutor && "Add students to get started."}
+              No students enrolled yet. {isTutor && "Enroll students to get started."}
             </div>
           )}
         </div>
 
         {/* Course Content Button */}
-        <div className="mt-6">
+        <div>
           <button
             onClick={() => router.push("/editor")}
             className="w-full px-6 py-4 bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-lg transition-colors text-left"

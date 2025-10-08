@@ -2,30 +2,36 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Plus, X } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
+import { mockDepartments, mockTerms, mockInstructors } from "@/lib/mock-data"
 
 export default function CreateCoursePage() {
   const router = useRouter()
+
+  const [departmentId, setDepartmentId] = useState("")
+  const [courseCode, setCourseCode] = useState("")
   const [courseName, setCourseName] = useState("")
   const [description, setDescription] = useState("")
-  const [topics, setTopics] = useState<string[]>([])
-  const [newTopic, setNewTopic] = useState("")
-
-  const handleAddTopic = () => {
-    if (newTopic.trim()) {
-      setTopics([...topics, newTopic.trim()])
-      setNewTopic("")
-    }
-  }
-
-  const handleRemoveTopic = (index: number) => {
-    setTopics(topics.filter((_, i) => i !== index))
-  }
+  const [credits, setCredits] = useState(3)
+  const [termId, setTermId] = useState("")
+  const [instructorId, setInstructorId] = useState("")
+  const [section, setSection] = useState("A")
+  const [capacity, setCapacity] = useState(30)
 
   const handleCreateCourse = () => {
-    if (courseName.trim()) {
-      // TODO: Save course to database
-      console.log("[v0] Creating course:", { courseName, description, topics })
+    if (courseName.trim() && departmentId && termId && instructorId) {
+      // TODO: Save course and offering to database
+      console.log("[v0] Creating course:", {
+        departmentId,
+        courseCode,
+        courseName,
+        description,
+        credits,
+        termId,
+        instructorId,
+        section,
+        capacity,
+      })
       router.push("/courses")
     }
   }
@@ -41,10 +47,52 @@ export default function CreateCoursePage() {
           <span>Back to Courses</span>
         </button>
 
-        <h1 className="text-3xl font-bold mb-2">Create New Course</h1>
-        <p className="text-gray-400 mb-8">Set up a new course with topics and materials</p>
+        <h1 className="text-3xl font-bold mb-2">Create New Course Offering</h1>
+        <p className="text-gray-400 mb-8">Set up a new course offering for a specific term</p>
 
         <div className="space-y-6">
+          {/* Department */}
+          <div>
+            <label className="block text-sm font-medium mb-2">Department</label>
+            <select
+              value={departmentId}
+              onChange={(e) => setDepartmentId(e.target.value)}
+              className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg focus:outline-none focus:border-gray-700 text-white"
+            >
+              <option value="">Select department...</option>
+              {mockDepartments.map((dept) => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.name} ({dept.code})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Course Code and Name */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Course Code</label>
+              <input
+                type="text"
+                value={courseCode}
+                onChange={(e) => setCourseCode(e.target.value)}
+                placeholder="e.g., CS101"
+                className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg focus:outline-none focus:border-gray-700 text-white placeholder-gray-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Credits</label>
+              <input
+                type="number"
+                value={credits}
+                onChange={(e) => setCredits(Number.parseInt(e.target.value))}
+                min="1"
+                max="6"
+                className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg focus:outline-none focus:border-gray-700 text-white"
+              />
+            </div>
+          </div>
+
           {/* Course Name */}
           <div>
             <label className="block text-sm font-medium mb-2">Course Name</label>
@@ -52,7 +100,7 @@ export default function CreateCoursePage() {
               type="text"
               value={courseName}
               onChange={(e) => setCourseName(e.target.value)}
-              placeholder="e.g., Year 7 Maths Extension"
+              placeholder="e.g., Introduction to Computer Science"
               className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg focus:outline-none focus:border-gray-700 text-white placeholder-gray-500"
             />
           </div>
@@ -69,43 +117,61 @@ export default function CreateCoursePage() {
             />
           </div>
 
-          {/* Topics */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Topics</label>
-            <div className="space-y-3">
-              {topics.map((topic, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 bg-gray-900 border border-gray-800 rounded-lg px-4 py-3"
-                >
-                  <span className="flex-1">{topic}</span>
-                  <button
-                    onClick={() => handleRemoveTopic(index)}
-                    className="text-gray-400 hover:text-red-400 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
+          {/* Term and Section */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Academic Term</label>
+              <select
+                value={termId}
+                onChange={(e) => setTermId(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg focus:outline-none focus:border-gray-700 text-white"
+              >
+                <option value="">Select term...</option>
+                {mockTerms.map((term) => (
+                  <option key={term.id} value={term.id}>
+                    {term.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Section</label>
+              <input
+                type="text"
+                value={section}
+                onChange={(e) => setSection(e.target.value)}
+                placeholder="A"
+                className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg focus:outline-none focus:border-gray-700 text-white placeholder-gray-500"
+              />
+            </div>
+          </div>
 
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newTopic}
-                  onChange={(e) => setNewTopic(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleAddTopic()
-                  }}
-                  placeholder="Add a topic..."
-                  className="flex-1 px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg focus:outline-none focus:border-gray-700 text-white placeholder-gray-500"
-                />
-                <button
-                  onClick={handleAddTopic}
-                  className="px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  <Plus className="w-5 h-5" />
-                </button>
-              </div>
+          {/* Instructor and Capacity */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Instructor</label>
+              <select
+                value={instructorId}
+                onChange={(e) => setInstructorId(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg focus:outline-none focus:border-gray-700 text-white"
+              >
+                <option value="">Select instructor...</option>
+                {mockInstructors.map((instructor) => (
+                  <option key={instructor.id} value={instructor.id}>
+                    {instructor.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Capacity</label>
+              <input
+                type="number"
+                value={capacity}
+                onChange={(e) => setCapacity(Number.parseInt(e.target.value))}
+                min="1"
+                className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg focus:outline-none focus:border-gray-700 text-white"
+              />
             </div>
           </div>
 
@@ -113,10 +179,10 @@ export default function CreateCoursePage() {
           <div className="flex gap-4 pt-6">
             <button
               onClick={handleCreateCourse}
-              disabled={!courseName.trim()}
+              disabled={!courseName.trim() || !departmentId || !termId || !instructorId}
               className="flex-1 px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Course
+              Create Course Offering
             </button>
             <button
               onClick={() => router.back()}
