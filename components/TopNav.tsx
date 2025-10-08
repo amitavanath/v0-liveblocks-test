@@ -11,6 +11,7 @@ export function TopNav() {
 
   const tabs = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
+    { name: "Courses", href: "/courses", icon: FileText },
     { name: "Document", href: "/editor", icon: FileText },
     { name: "Sheet", href: "/sheet", icon: Table },
     { name: "Whiteboard", href: "/whiteboard", icon: PenTool },

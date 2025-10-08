@@ -6,45 +6,64 @@ import { useUser } from "@/lib/user-context"
 interface Document {
   id: string
   name: string
+  type: "document" | "whiteboard" | "sheet"
 }
 
-interface Folder {
+interface Topic {
   id: string
   name: string
   documents: Document[]
 }
 
+interface Folder {
+  id: string
+  name: string
+  topics: Topic[]
+}
+
 export function Sidebar() {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(["maths"]))
-  const [selectedDoc, setSelectedDoc] = useState<string>("integers")
+  const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set(["maths-integers"]))
+  const [selectedDoc, setSelectedDoc] = useState<string>("integers-doc")
   const [folders, setFolders] = useState<Folder[]>([
     {
       id: "maths",
       name: "Maths",
-      documents: [
-        { id: "integers", name: "Integers" },
-        { id: "fractions", name: "Fractions" },
-        { id: "algebra", name: "Algebra" },
+      topics: [
+        {
+          id: "maths-integers",
+          name: "Integers",
+          documents: [
+            { id: "integers-doc", name: "Introduction", type: "document" },
+            { id: "integers-sheet", name: "Practice Sheet", type: "sheet" },
+          ],
+        },
+        {
+          id: "maths-fractions",
+          name: "Fractions",
+          documents: [{ id: "fractions-doc", name: "Basics", type: "document" }],
+        },
       ],
     },
     {
       id: "english",
       name: "English",
-      documents: [
-        { id: "grammar", name: "Grammar" },
-        { id: "persuasive-writing", name: "Persuasive Writing" },
+      topics: [
+        {
+          id: "english-grammar",
+          name: "Grammar",
+          documents: [{ id: "grammar-doc", name: "Rules", type: "document" }],
+        },
       ],
-    },
-    {
-      id: "archive",
-      name: "Archive",
-      documents: [{ id: "old-docs", name: "Old Documents" }],
     },
   ])
   const [showNewCourseInput, setShowNewCourseInput] = useState(false)
   const [newCourseName, setNewCourseName] = useState("")
-  const [addingDocToFolder, setAddingDocToFolder] = useState<string | null>(null)
+  const [addingTopicToFolder, setAddingTopicToFolder] = useState<string | null>(null)
+  const [newTopicName, setNewTopicName] = useState("")
+  const [addingDocToTopic, setAddingDocToTopic] = useState<string | null>(null)
   const [newDocName, setNewDocName] = useState("")
+  const [newDocType, setNewDocType] = useState<"document" | "whiteboard" | "sheet">("document")
 
   const { user } = useUser()
   const isTutor = user.role === "tutor"
@@ -59,12 +78,22 @@ export function Sidebar() {
     setExpandedFolders(newExpanded)
   }
 
+  const toggleTopic = (topicId: string) => {
+    const newExpanded = new Set(expandedTopics)
+    if (newExpanded.has(topicId)) {
+      newExpanded.delete(topicId)
+    } else {
+      newExpanded.add(topicId)
+    }
+    setExpandedTopics(newExpanded)
+  }
+
   const handleAddCourse = () => {
     if (newCourseName.trim()) {
       const newFolder: Folder = {
         id: newCourseName.toLowerCase().replace(/\s+/g, "-"),
         name: newCourseName,
-        documents: [],
+        topics: [],
       }
       setFolders([...folders, newFolder])
       setExpandedFolders(new Set([...expandedFolders, newFolder.id]))
@@ -73,19 +102,57 @@ export function Sidebar() {
     }
   }
 
-  const handleAddDocument = (folderId: string) => {
-    if (newDocName.trim()) {
-      const newDoc: Document = {
-        id: `${folderId}-${newDocName.toLowerCase().replace(/\s+/g, "-")}`,
-        name: newDocName,
+  const handleAddTopic = (folderId: string) => {
+    if (newTopicName.trim()) {
+      const newTopic: Topic = {
+        id: `${folderId}-${newTopicName.toLowerCase().replace(/\s+/g, "-")}`,
+        name: newTopicName,
+        documents: [],
       }
       setFolders(
         folders.map((folder) =>
-          folder.id === folderId ? { ...folder, documents: [...folder.documents, newDoc] } : folder,
+          folder.id === folderId ? { ...folder, topics: [...folder.topics, newTopic] } : folder,
+        ),
+      )
+      setExpandedTopics(new Set([...expandedTopics, newTopic.id]))
+      setNewTopicName("")
+      setAddingTopicToFolder(null)
+    }
+  }
+
+  const handleAddDocument = (folderId: string, topicId: string) => {
+    if (newDocName.trim()) {
+      const newDoc: Document = {
+        id: `${topicId}-${newDocName.toLowerCase().replace(/\s+/g, "-")}`,
+        name: newDocName,
+        type: newDocType,
+      }
+      setFolders(
+        folders.map((folder) =>
+          folder.id === folderId
+            ? {
+                ...folder,
+                topics: folder.topics.map((topic) =>
+                  topic.id === topicId ? { ...topic, documents: [...topic.documents, newDoc] } : topic,
+                ),
+              }
+            : folder,
         ),
       )
       setNewDocName("")
-      setAddingDocToFolder(null)
+      setNewDocType("document")
+      setAddingDocToTopic(null)
+    }
+  }
+
+  const getDocIcon = (type: string) => {
+    switch (type) {
+      case "whiteboard":
+        return "🎨"
+      case "sheet":
+        return "📊"
+      default:
+        return <FileText className="w-4 h-4" />
     }
   }
 
@@ -126,30 +193,13 @@ export function Sidebar() {
                   className="w-full px-3 py-2 text-sm bg-gray-900 text-white border border-gray-700 rounded focus:outline-none focus:border-gray-600"
                   autoFocus
                 />
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleAddCourse}
-                    className="flex-1 px-3 py-1 text-xs bg-white text-black rounded hover:bg-gray-200 transition-colors"
-                  >
-                    Add
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowNewCourseInput(false)
-                      setNewCourseName("")
-                    }}
-                    className="flex-1 px-3 py-1 text-xs bg-gray-800 text-white rounded hover:bg-gray-700 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
               </div>
             )}
           </div>
         )}
 
         {folders.map((folder) => {
-          const isExpanded = expandedFolders.has(folder.id)
+          const isFolderExpanded = expandedFolders.has(folder.id)
           return (
             <div key={folder.id} className="mb-2">
               <div className="flex items-center gap-1 px-4">
@@ -157,54 +207,146 @@ export function Sidebar() {
                   onClick={() => toggleFolder(folder.id)}
                   className="flex-1 flex items-center gap-2 py-2 text-gray-400 hover:text-white hover:bg-gray-900 transition-colors rounded"
                 >
-                  {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                  {isFolderExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                   <span className="text-sm font-medium">{folder.name}</span>
                 </button>
-                {isExpanded && isTutor && (
+                {isFolderExpanded && isTutor && (
                   <button
-                    onClick={() => setAddingDocToFolder(folder.id)}
+                    onClick={() => setAddingTopicToFolder(folder.id)}
                     className="p-1 text-gray-400 hover:text-white hover:bg-gray-900 rounded transition-colors"
-                    title="Add document"
+                    title="Add topic"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 )}
               </div>
-              {isExpanded && (
+
+              {isFolderExpanded && (
                 <div className="ml-2">
-                  {addingDocToFolder === folder.id && (
+                  {addingTopicToFolder === folder.id && (
                     <div className="px-4 py-2">
                       <input
                         type="text"
-                        value={newDocName}
-                        onChange={(e) => setNewDocName(e.target.value)}
+                        value={newTopicName}
+                        onChange={(e) => setNewTopicName(e.target.value)}
                         onKeyDown={(e) => {
-                          if (e.key === "Enter") handleAddDocument(folder.id)
+                          if (e.key === "Enter") handleAddTopic(folder.id)
                           if (e.key === "Escape") {
-                            setAddingDocToFolder(null)
-                            setNewDocName("")
+                            setAddingTopicToFolder(null)
+                            setNewTopicName("")
                           }
                         }}
-                        placeholder="Document name..."
+                        placeholder="Topic name..."
                         className="w-full px-2 py-1 text-sm bg-gray-900 text-white border border-gray-700 rounded focus:outline-none focus:border-gray-600"
                         autoFocus
                       />
                     </div>
                   )}
-                  {folder.documents.map((doc) => (
-                    <button
-                      key={doc.id}
-                      onClick={() => setSelectedDoc(doc.id)}
-                      className={`w-full flex items-center gap-2 px-4 py-2 text-sm transition-colors ${
-                        selectedDoc === doc.id
-                          ? "text-white bg-gray-900"
-                          : "text-gray-400 hover:text-white hover:bg-gray-900"
-                      }`}
-                    >
-                      <FileText className="w-4 h-4" />
-                      <span className="truncate">{doc.name}</span>
-                    </button>
-                  ))}
+
+                  {folder.topics.map((topic) => {
+                    const isTopicExpanded = expandedTopics.has(topic.id)
+                    return (
+                      <div key={topic.id} className="ml-2">
+                        <div className="flex items-center gap-1 px-4">
+                          <button
+                            onClick={() => toggleTopic(topic.id)}
+                            className="flex-1 flex items-center gap-2 py-2 text-gray-400 hover:text-white hover:bg-gray-900 transition-colors rounded text-sm"
+                          >
+                            {isTopicExpanded ? (
+                              <ChevronDown className="w-3 h-3" />
+                            ) : (
+                              <ChevronRight className="w-3 h-3" />
+                            )}
+                            <span>{topic.name}</span>
+                          </button>
+                          {isTopicExpanded && isTutor && (
+                            <button
+                              onClick={() => setAddingDocToTopic(topic.id)}
+                              className="p-1 text-gray-400 hover:text-white hover:bg-gray-900 rounded transition-colors"
+                              title="Add page"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+
+                        {isTopicExpanded && (
+                          <div className="ml-4">
+                            {addingDocToTopic === topic.id && (
+                              <div className="px-4 py-2 space-y-2">
+                                <input
+                                  type="text"
+                                  value={newDocName}
+                                  onChange={(e) => setNewDocName(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") handleAddDocument(folder.id, topic.id)
+                                    if (e.key === "Escape") {
+                                      setAddingDocToTopic(null)
+                                      setNewDocName("")
+                                    }
+                                  }}
+                                  placeholder="Page name..."
+                                  className="w-full px-2 py-1 text-xs bg-gray-900 text-white border border-gray-700 rounded focus:outline-none focus:border-gray-600"
+                                  autoFocus
+                                />
+                                <div className="flex gap-1">
+                                  <button
+                                    onClick={() => setNewDocType("document")}
+                                    className={`flex-1 px-2 py-1 text-xs rounded transition-colors ${
+                                      newDocType === "document"
+                                        ? "bg-blue-600 text-white"
+                                        : "bg-gray-800 text-gray-400 hover:text-white"
+                                    }`}
+                                  >
+                                    Doc
+                                  </button>
+                                  <button
+                                    onClick={() => setNewDocType("whiteboard")}
+                                    className={`flex-1 px-2 py-1 text-xs rounded transition-colors ${
+                                      newDocType === "whiteboard"
+                                        ? "bg-purple-600 text-white"
+                                        : "bg-gray-800 text-gray-400 hover:text-white"
+                                    }`}
+                                  >
+                                    Board
+                                  </button>
+                                  <button
+                                    onClick={() => setNewDocType("sheet")}
+                                    className={`flex-1 px-2 py-1 text-xs rounded transition-colors ${
+                                      newDocType === "sheet"
+                                        ? "bg-green-600 text-white"
+                                        : "bg-gray-800 text-gray-400 hover:text-white"
+                                    }`}
+                                  >
+                                    Sheet
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {topic.documents.map((doc) => (
+                              <button
+                                key={doc.id}
+                                onClick={() => setSelectedDoc(doc.id)}
+                                className={`w-full flex items-center gap-2 px-4 py-2 text-xs transition-colors ${
+                                  selectedDoc === doc.id
+                                    ? "text-white bg-gray-900"
+                                    : "text-gray-400 hover:text-white hover:bg-gray-900"
+                                }`}
+                              >
+                                {typeof getDocIcon(doc.type) === "string" ? (
+                                  <span>{getDocIcon(doc.type)}</span>
+                                ) : (
+                                  getDocIcon(doc.type)
+                                )}
+                                <span className="truncate">{doc.name}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </div>
