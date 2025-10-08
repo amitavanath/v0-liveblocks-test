@@ -19,20 +19,20 @@ export function Sidebar() {
 
   const folders: Folder[] = [
     {
-      id: "recent",
-      name: "Recent",
+      id: "maths",
+      name: "Maths",
       documents: [
-        { id: "manifesto", name: "Manifesto" },
-        { id: "product-spec", name: "Product Spec" },
-        { id: "meeting-notes", name: "Meeting Notes" },
+        { id: "integers", name: "Integers" },
+        { id: "fractions", name: "Fractions" },
+        { id: "algebra", name: "Algebra" },
       ],
     },
     {
-      id: "projects",
-      name: "Projects",
+      id: "english",
+      name: "English",
       documents: [
-        { id: "project-alpha", name: "Project Alpha" },
-        { id: "project-beta", name: "Project Beta" },
+        { id: "grammar", name: "Grammar" },
+        { id: "persuasive-writing", name: "Persuasive Writing" },
       ],
     },
     {
