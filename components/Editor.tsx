@@ -16,6 +16,7 @@ export function Editor() {
   const { threads } = useThreads({ query: { resolved: false } })
 
   const editor = useEditor({
+    immediatelyRender: false, // Added immediatelyRender: false to fix SSR hydration mismatch
     editorProps: {
       attributes: {
         class: "outline-none flex-1 transition-all",
