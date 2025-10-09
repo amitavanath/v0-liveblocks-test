@@ -1,6 +1,6 @@
 "use client"
 
-import { FileText, LayoutDashboard, Table, PenTool } from "lucide-react"
+import { FileText, LayoutDashboard, Table, PenTool, BookOpen } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useUser } from "@/lib/user-context"
@@ -9,19 +9,25 @@ export function TopNav() {
   const pathname = usePathname()
   const { user, setUserRole } = useUser()
 
-  const tabs = [
+  const primaryTabs = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
-    { name: "Courses", href: "/courses", icon: FileText },
+    { name: "Courses", href: "/courses", icon: BookOpen },
+  ]
+
+  const contentTabs = [
     { name: "Document", href: "/editor", icon: FileText },
     { name: "Sheet", href: "/sheet", icon: Table },
     { name: "Whiteboard", href: "/whiteboard", icon: PenTool },
   ]
 
+  const showContentTabs =
+    pathname.startsWith("/editor") || pathname.startsWith("/sheet") || pathname.startsWith("/whiteboard")
+
   return (
     <div className="bg-black border-b border-gray-800">
       <div className="flex items-center justify-between px-4">
         <div className="flex items-center gap-1">
-          {tabs.map((tab) => {
+          {primaryTabs.map((tab) => {
             const Icon = tab.icon
             const isActive = pathname === tab.href
             return (
@@ -37,6 +43,28 @@ export function TopNav() {
               </Link>
             )
           })}
+
+          {showContentTabs && (
+            <>
+              <div className="w-px h-6 bg-gray-800 mx-2" />
+              {contentTabs.map((tab) => {
+                const Icon = tab.icon
+                const isActive = pathname === tab.href
+                return (
+                  <Link
+                    key={tab.name}
+                    href={tab.href}
+                    className={`flex items-center gap-2 px-4 py-3 text-sm transition-colors ${
+                      isActive ? "text-white border-b-2 border-white" : "text-gray-400 hover:text-gray-200"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {tab.name}
+                  </Link>
+                )
+              })}
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-4 py-2">

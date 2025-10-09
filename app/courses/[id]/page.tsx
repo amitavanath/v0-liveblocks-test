@@ -176,13 +176,13 @@ export default function CourseDetailPage() {
         {/* Course Content Button */}
         <div>
           <button
-            onClick={() => router.push("/editor")}
+            onClick={() => router.push(`/editor?courseId=${offeringId}`)}
             className="w-full px-6 py-4 bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-lg transition-colors text-left"
           >
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-semibold mb-1">Course Content</h3>
-                <p className="text-sm text-gray-400">View and edit course materials</p>
+                <p className="text-sm text-gray-400">View and edit course materials, topics, and pages</p>
               </div>
               <ArrowLeft className="w-5 h-5 rotate-180" />
             </div>
