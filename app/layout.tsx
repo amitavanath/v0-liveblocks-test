@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Sidebar } from "@/components/Sidebar"
+import { ConditionalSidebar } from "@/components/ConditionalSidebar"
 import { TopNav } from "@/components/TopNav"
 import { UserProvider } from "@/lib/user-context"
 import "@liveblocks/react-ui/styles.css"
@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className="bg-black text-white">
         <UserProvider>
           <div className="flex h-screen overflow-hidden">
-            <Sidebar />
+            <ConditionalSidebar />
             <div className="flex-1 flex flex-col overflow-hidden">
               <TopNav />
               <main className="flex-1 overflow-auto">{children}</main>
