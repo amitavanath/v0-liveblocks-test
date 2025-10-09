@@ -37,6 +37,15 @@ export interface Course {
   name: string
   description?: string
   credits: number
+  level: "undergraduate" | "graduate" | "certificate"
+  category?: string
+  language: string
+  learningOutcomes?: string[]
+  topics?: string[]
+  targetAudience?: string
+  status: "draft" | "under_review" | "approved" | "archived"
+  createdAt: Date
+  updatedAt: Date
 }
 
 // Prerequisite
@@ -65,7 +74,12 @@ export interface CourseOffering {
   section: string
   capacity: number
   enrolledCount: number
-  status: "draft" | "open" | "closed" | "completed"
+  mode: "in-person" | "online" | "hybrid"
+  location?: string
+  visibility: "public" | "internal" | "restricted"
+  status: "draft" | "under_review" | "approved" | "active" | "completed" | "archived"
+  createdAt: Date
+  updatedAt: Date
 }
 
 // Class schedule
@@ -133,4 +147,42 @@ export interface Topic {
   name: string
   order: number
   parentId?: string
+}
+
+export interface Assessment {
+  id: string
+  offeringId: string
+  name: string
+  type: "exam" | "assignment" | "quiz" | "project" | "participation"
+  weightage: number
+  dueDate?: Date
+  description?: string
+}
+
+export interface Resource {
+  id: string
+  offeringId: string
+  title: string
+  type: "textbook" | "article" | "video" | "link" | "tool"
+  url?: string
+  description?: string
+  isRequired: boolean
+}
+
+export interface ContentUnit {
+  id: string
+  offeringId: string
+  title: string
+  type: "week" | "module" | "lesson"
+  order: number
+  objectives?: string[]
+  description?: string
+}
+
+export interface CourseTemplate {
+  id: string
+  name: string
+  description: string
+  type: "lecture" | "lab" | "seminar" | "project" | "online"
+  defaultFields: Partial<Course>
 }
