@@ -24,7 +24,7 @@
     "@tiptap/extension-table-header": "latest",
     "@tiptap/extension-table-row": "latest",
     "@tiptap/extensions": "latest",
-    "@tiptap/pm": "^2.25.0",
+    "@tiptap/pm": "latest",
     "@tiptap/react": "latest",
     "@tiptap/starter-kit": "latest",
     "@tiptap/suggestion": "latest",

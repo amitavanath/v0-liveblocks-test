@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useLiveblocksExtension, FloatingToolbar, AnchoredThreads, FloatingComposer } from "@liveblocks/react-tiptap"
 import { useThreads } from "@liveblocks/react/suspense"
 import { useEditor, EditorContent } from "@tiptap/react"
@@ -10,7 +12,9 @@ import { TableCell } from "@tiptap/extension-table-cell"
 import { TableHeader } from "@tiptap/extension-table-header"
 import { Placeholder } from "@tiptap/extension-placeholder"
 import { SlashCommand } from "@/lib/slash-command-extension"
+import { BlockMenuExtension } from "@/lib/block-menu-extension"
 import { useUser } from "@/lib/user-context"
+import { useDocument } from "@/lib/document-context"
 import { useEffect, useState } from "react"
 import type { TemplateKey } from "./course-templates"
 import { TemplateGallery } from "./TemplateGallery"
@@ -18,13 +22,15 @@ import { CustomTemplateManager } from "./CustomTemplateManager"
 import { TemplateOnboarding } from "./TemplateOnboarding"
 import { GuidedTemplateSetup } from "./GuidedTemplateSetup"
 import { AIAssistant } from "./AIAssistant"
-import { FileText, TableIcon, Info, List, Plus, Save } from "lucide-react"
+import { FileText, TableIcon, Info, List, Plus, Smile } from "lucide-react"
 import type { SavedTemplate } from "@/lib/types"
 import { VariableInserter } from "./VariableInserter"
 import { FloatingSideToolbar } from "./FloatingSideToolbar"
+import { BlockMenu } from "./BlockMenu"
 
 export function Editor() {
   const { user } = useUser()
+  const { documentTitle, setDocumentTitle } = useDocument()
   const isStudent = user.role === "student"
   const [showTemplates, setShowTemplates] = useState(false)
   const [showElements, setShowElements] = useState(false)
@@ -41,6 +47,12 @@ export function Editor() {
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false)
   const [showAIAssistant, setShowAIAssistant] = useState(false)
   const [hasThreads, setHasThreads] = useState(false)
+  const [showBlockMenu, setShowBlockMenu] = useState(false)
+  const [blockMenuPosition, setBlockMenuPosition] = useState({ x: 0, y: 0 })
+  const [showTitle, setShowTitle] = useState(true)
+  const [showAuthorInfo, setShowAuthorInfo] = useState(true)
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [tempTitle, setTempTitle] = useState(documentTitle)
 
   const liveblocks = useLiveblocksExtension()
   const { threads } = useThreads({ query: { resolved: false } })
@@ -80,9 +92,10 @@ export function Editor() {
         },
       }),
       Placeholder.configure({
-        placeholder: "Use ⌘+' to ask AI, or type / to insert elements",
+        placeholder: "",
       }),
       SlashCommand,
+      BlockMenuExtension,
     ],
     content: "",
     onUpdate: ({ editor }) => {
@@ -92,15 +105,17 @@ export function Editor() {
   })
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "'") {
-        e.preventDefault()
-        setShowAIAssistant(true)
-      }
+    const handleShowBlockMenu = (e: Event) => {
+      const customEvent = e as CustomEvent
+      setBlockMenuPosition({
+        x: customEvent.detail.x,
+        y: customEvent.detail.y,
+      })
+      setShowBlockMenu(true)
     }
 
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
+    window.addEventListener("showBlockMenu", handleShowBlockMenu)
+    return () => window.removeEventListener("showBlockMenu", handleShowBlockMenu)
   }, [])
 
   useEffect(() => {
@@ -169,6 +184,42 @@ export function Editor() {
     // Implementation for handling guided setup completion
   }
 
+  const handleContentClick = () => {
+    if (editor && !isStudent) {
+      editor.commands.focus()
+    }
+  }
+
+  const handleTitleClick = () => {
+    if (!isStudent) {
+      setIsEditingTitle(true)
+      setTempTitle(documentTitle)
+    }
+  }
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTempTitle(e.target.value)
+  }
+
+  const handleTitleBlur = () => {
+    setIsEditingTitle(false)
+    if (tempTitle.trim()) {
+      setDocumentTitle(tempTitle.trim())
+    } else {
+      setTempTitle(documentTitle)
+    }
+  }
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      handleTitleBlur()
+    } else if (e.key === "Escape") {
+      setIsEditingTitle(false)
+      setTempTitle(documentTitle)
+    }
+  }
+
   if (!editor) {
     return <div className="p-8 text-gray-400">Loading editor...</div>
   }
@@ -184,67 +235,150 @@ export function Editor() {
       )}
 
       <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 overflow-auto relative">
+        <div className="flex-1 overflow-auto relative" onClick={handleContentClick}>
+          <div className="max-w-4xl mx-auto px-16 pt-20">
+            {showTitle && (
+              <div className="flex items-center gap-3 mb-6 group relative">
+                <div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-gray-400" />
+                </div>
+                {isEditingTitle ? (
+                  <input
+                    type="text"
+                    value={tempTitle}
+                    onChange={handleTitleChange}
+                    onBlur={handleTitleBlur}
+                    onKeyDown={handleTitleKeyDown}
+                    className="text-5xl font-bold text-white bg-transparent border-none outline-none flex-1"
+                    autoFocus
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                ) : (
+                  <h1
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleTitleClick()
+                    }}
+                    className="text-5xl font-bold text-gray-400 hover:text-gray-300 cursor-text transition-colors"
+                  >
+                    {documentTitle}
+                  </h1>
+                )}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowTitle(false)
+                  }}
+                  className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-800 rounded"
+                  title="Remove title"
+                >
+                  <svg
+                    className="w-5 h-5 text-gray-500 hover:text-gray-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            )}
+
+            {showAuthorInfo && (
+              <div className="flex items-center gap-3 mb-8 group relative">
+                <div className="w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center text-xs font-semibold text-white">
+                  {user.name.charAt(0)}
+                </div>
+                <span className="text-sm text-gray-400">By {user.name}</span>
+                <button className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-400 transition-colors">
+                  <Smile className="w-4 h-4" />
+                  Add a reaction
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowAuthorInfo(false)
+                  }}
+                  className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-800 rounded"
+                  title="Remove author info"
+                >
+                  <svg
+                    className="w-5 h-5 text-gray-500 hover:text-gray-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            )}
+
+            {isEmpty && (
+              <p className="text-gray-500 text-base mb-12">
+                {isStudent ? "This document is read-only" : "Use ⌘+' to ask AI, or type / to insert elements"}
+              </p>
+            )}
+          </div>
+
           <EditorContent editor={editor} className="h-full" />
 
           {!isStudent && isEmpty && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4">
-              <div className="bg-[#1a1a1a] border border-gray-700 rounded-lg p-4 shadow-2xl">
-                {/* Template buttons */}
-                <div className="flex flex-wrap gap-2 mb-3">
+            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-full max-w-3xl px-4 pointer-events-none">
+              <div className="bg-[#1f1f1f] border border-gray-800 rounded-lg p-6 shadow-2xl pointer-events-auto">
+                <div className="flex flex-wrap gap-2.5 mb-4">
                   <button
                     onClick={() => handleTemplateSelect("projectPlan")}
-                    className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-md transition-colors flex items-center gap-2"
+                    className="px-4 py-2.5 bg-[#2a2a2a] hover:bg-[#333333] text-gray-300 text-sm rounded-md transition-colors flex items-center gap-2.5 border border-gray-800"
                   >
                     <FileText className="w-4 h-4" />
                     Project plan
                   </button>
                   <button
                     onClick={() => handleTemplateSelect("lessonPlan")}
-                    className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-md transition-colors flex items-center gap-2"
+                    className="px-4 py-2.5 bg-[#2a2a2a] hover:bg-[#333333] text-gray-300 text-sm rounded-md transition-colors flex items-center gap-2.5 border border-gray-800"
                   >
                     <FileText className="w-4 h-4" />
                     Lesson plan
                   </button>
                   <button
                     onClick={() => handleTemplateSelect("syllabus")}
-                    className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-md transition-colors flex items-center gap-2"
+                    className="px-4 py-2.5 bg-[#2a2a2a] hover:bg-[#333333] text-gray-300 text-sm rounded-md transition-colors flex items-center gap-2.5 border border-gray-800"
                   >
                     <FileText className="w-4 h-4" />
                     Syllabus
                   </button>
                   <button
                     onClick={() => setShowTemplateGallery(true)}
-                    className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-md transition-colors"
+                    className="px-4 py-2.5 bg-[#2a2a2a] hover:bg-[#333333] text-gray-300 text-sm rounded-md transition-colors border border-gray-800"
                   >
                     All templates
                   </button>
                 </div>
 
-                {/* Element insertion buttons */}
-                <div className="flex flex-wrap gap-2 pt-3 border-t border-gray-700">
+                <div className="flex flex-wrap gap-2.5 pt-4 border-t border-gray-800">
                   <button
                     onClick={insertTable}
-                    className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-md transition-colors flex items-center gap-2"
+                    className="px-4 py-2.5 bg-[#2a2a2a] hover:bg-[#333333] text-gray-300 text-sm rounded-md transition-colors flex items-center gap-2.5 border border-gray-800"
                   >
                     <TableIcon className="w-4 h-4" />
                     Table
                   </button>
                   <button
                     onClick={insertInfoPanel}
-                    className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-md transition-colors flex items-center gap-2"
+                    className="px-4 py-2.5 bg-[#2a2a2a] hover:bg-[#333333] text-gray-300 text-sm rounded-md transition-colors flex items-center gap-2.5 border border-gray-800"
                   >
                     <Info className="w-4 h-4" />
                     Info panel
                   </button>
                   <button
                     onClick={insertTableOfContents}
-                    className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-md transition-colors flex items-center gap-2"
+                    className="px-4 py-2.5 bg-[#2a2a2a] hover:bg-[#333333] text-gray-300 text-sm rounded-md transition-colors flex items-center gap-2.5 border border-gray-800"
                   >
                     <List className="w-4 h-4" />
                     Table of contents
                   </button>
-                  <button className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-md transition-colors flex items-center gap-2">
+                  <button className="px-4 py-2.5 bg-[#2a2a2a] hover:bg-[#333333] text-gray-300 text-sm rounded-md transition-colors flex items-center gap-2.5 border border-gray-800">
                     <Plus className="w-4 h-4" />
                     More elements
                   </button>
@@ -263,6 +397,10 @@ export function Editor() {
 
       <FloatingToolbar editor={editor} />
       <FloatingComposer editor={editor} />
+
+      {showBlockMenu && editor && (
+        <BlockMenu editor={editor} position={blockMenuPosition} onClose={() => setShowBlockMenu(false)} />
+      )}
 
       <AIAssistant
         open={showAIAssistant}

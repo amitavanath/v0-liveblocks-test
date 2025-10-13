@@ -2,6 +2,7 @@
 import { useState } from "react"
 import { ChevronDown, ChevronRight, FileText, Plus } from "lucide-react"
 import { useUser } from "@/lib/user-context"
+import { useDocument } from "@/lib/document-context"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 
 interface Document {
@@ -23,6 +24,7 @@ interface Folder {
 }
 
 export function Sidebar() {
+  const { documentTitle } = useDocument()
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(["maths"]))
   const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set(["maths-integers"]))
   const [selectedDoc, setSelectedDoc] = useState<string>("integers-doc")
@@ -327,7 +329,9 @@ export function Sidebar() {
                                 ) : (
                                   getDocIcon(doc.type)
                                 )}
-                                <span className="truncate">{doc.name}</span>
+                                <span className="truncate">
+                                  {selectedDoc === doc.id && pathname === "/editor" ? documentTitle : doc.name}
+                                </span>
                               </button>
                             ))}
                           </div>

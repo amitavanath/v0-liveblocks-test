@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { ConditionalSidebar } from "@/components/ConditionalSidebar"
 import { TopNav } from "@/components/TopNav"
 import { UserProvider } from "@/lib/user-context"
+import { DocumentProvider } from "@/lib/document-context"
 import "@liveblocks/react-ui/styles.css"
 import "@liveblocks/react-tiptap/styles.css"
 import "./globals.css"
@@ -22,13 +23,15 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className="bg-black text-white">
         <UserProvider>
-          <div className="flex h-screen overflow-hidden">
-            <ConditionalSidebar />
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <TopNav />
-              <main className="flex-1 overflow-auto">{children}</main>
+          <DocumentProvider>
+            <div className="flex h-screen overflow-hidden">
+              <ConditionalSidebar />
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <TopNav />
+                <main className="flex-1 overflow-auto">{children}</main>
+              </div>
             </div>
-          </div>
+          </DocumentProvider>
         </UserProvider>
       </body>
     </html>

@@ -113,6 +113,12 @@
   margin-right: auto;
   padding-left: 4rem;
   padding-right: 4rem;
+  position: relative;
+}
+
+.tiptap > *:hover {
+  /* Add subtle background on hover to indicate interactivity */
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .tiptap > table {
@@ -152,37 +158,179 @@
   line-height: 1.3;
 }
 
+.tiptap h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: #e5e7eb;
+  line-height: 1.4;
+}
+
+.tiptap h5 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 1.75rem;
+  margin-bottom: 0.625rem;
+  color: #e5e7eb;
+  line-height: 1.5;
+}
+
+.tiptap h6 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #e5e7eb;
+  line-height: 1.6;
+}
+
 .tiptap p {
   margin-bottom: 1.25rem;
   color: #9ca3af;
   line-height: 1.8;
   font-size: 1.0625rem;
+  min-height: 1.8em; /* Add minimum height to empty paragraphs so they're hoverable */
 }
 
 /* Add drag handle styles for block dragging */
-.tiptap [data-node-view-wrapper] {
+.tiptap [data-node-view-wrapper]:hover::before {
+  display: none;
+}
+
+/* Add group class for hover effects on blocks */
+.tiptap p,
+.tiptap h1,
+.tiptap h2,
+.tiptap h3,
+.tiptap h4,
+.tiptap h5,
+.tiptap h6,
+.tiptap ul,
+.tiptap ol,
+.tiptap blockquote,
+.tiptap pre,
+.tiptap table {
   position: relative;
 }
 
-.tiptap [data-node-view-wrapper]:hover::before {
-  content: "⋮⋮";
+/* Style for block controls container */
+.block-controls {
   position: absolute;
-  left: -2.5rem;
+  left: -3rem;
   top: 0.25rem;
-  opacity: 0.3;
-  cursor: grab;
-  font-size: 1.25rem;
-  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0;
   transition: opacity 0.2s;
-  user-select: none;
+  z-index: 10;
 }
 
-.tiptap [data-node-view-wrapper]:hover::before:hover {
-  opacity: 0.8;
+/* Show controls on hover of parent block */
+.tiptap > *:hover .block-controls,
+.tiptap p:hover .block-controls,
+.tiptap h1:hover .block-controls,
+.tiptap h2:hover .block-controls,
+.tiptap h3:hover .block-controls,
+.tiptap h4:hover .block-controls,
+.tiptap h5:hover .block-controls,
+.tiptap h6:hover .block-controls,
+.tiptap ul:hover .block-controls,
+.tiptap ol:hover .block-controls,
+.tiptap blockquote:hover .block-controls,
+.tiptap pre:hover .block-controls,
+.tiptap table:hover .block-controls {
+  opacity: 1;
 }
 
-.tiptap [data-node-view-wrapper]:hover::before:active {
+/* Style for individual control buttons */
+.block-control-btn {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.block-control-btn:hover {
+  color: #9ca3af;
+  background: #374151;
+}
+
+.block-control-btn[data-action="drag"] {
+  cursor: grab;
+}
+
+.block-control-btn[data-action="drag"]:active {
   cursor: grabbing;
+}
+
+/* Adding styles for Tiptap block menu extension */
+.block-menu-wrapper {
+  position: absolute;
+  left: -3.5rem;
+  top: 0;
+  width: calc(100% + 3.5rem);
+  height: 100%;
+  min-height: 1.8em;
+  display: flex;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.block-menu {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+  pointer-events: auto;
+}
+
+.block-menu-wrapper:hover .block-menu {
+  opacity: 1;
+}
+
+.block-menu-btn {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  padding: 0;
+}
+
+.block-menu-btn:hover {
+  color: #d1d5db;
+  background: #374151;
+}
+
+.block-menu-btn.drag-handle {
+  cursor: grab;
+}
+
+.block-menu-btn.drag-handle:active {
+  cursor: grabbing;
+}
+
+.block-menu-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
 .tiptap table {
