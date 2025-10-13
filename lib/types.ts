@@ -186,3 +186,30 @@ export interface CourseTemplate {
   type: "lecture" | "lab" | "seminar" | "project" | "online"
   defaultFields: Partial<Course>
 }
+
+// Template management types
+export interface SavedTemplate {
+  id: string
+  userId: string
+  name: string
+  description: string
+  category: string
+  tags: string[]
+  content: string
+  isPublic: boolean
+  departmentId?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface TemplateUsage {
+  userId: string
+  templateKey: string
+  usedAt: Date
+}
+
+export interface TemplateFavorite {
+  userId: string
+  templateKey: string
+  favoritedAt: Date
+}

@@ -4,9 +4,9 @@
 @custom-variant dark (&:is(.dark *));
 
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: oklch(0.098 0 0);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
+  --card: oklch(0.098 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.145 0 0);
   --popover-foreground: oklch(0.985 0 0);
@@ -100,22 +100,166 @@
   outline: none;
   width: 100%;
   min-height: 100%;
-  background: black;
+  background: #191919;
   color: white;
   font-size: 16px;
   line-height: 1.6;
 }
 
+/* Improved centering and spacing for better use of editor space */
+.tiptap > * {
+  max-width: 56rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 4rem;
+  padding-right: 4rem;
+}
+
+.tiptap > table {
+  max-width: 64rem;
+}
+
+/* Improved title and heading styles with improved spacing */
 .tiptap h1 {
-  font-size: 2.5rem;
-  font-weight: 600;
+  font-size: 3rem;
+  font-weight: 700;
   margin-bottom: 1.5rem;
-  color: white;
+  margin-top: 1.5rem;
+  color: #f3f4f6;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.tiptap h1:first-child {
+  margin-top: 0;
+}
+
+.tiptap h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-top: 3rem;
+  margin-bottom: 1.25rem;
+  color: #e5e7eb;
+  line-height: 1.2;
+}
+
+.tiptap h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  color: #e5e7eb;
+  line-height: 1.3;
 }
 
 .tiptap p {
+  margin-bottom: 1.25rem;
+  color: #9ca3af;
+  line-height: 1.8;
+  font-size: 1.0625rem;
+}
+
+/* Add drag handle styles for block dragging */
+.tiptap [data-node-view-wrapper] {
+  position: relative;
+}
+
+.tiptap [data-node-view-wrapper]:hover::before {
+  content: "⋮⋮";
+  position: absolute;
+  left: -2.5rem;
+  top: 0.25rem;
+  opacity: 0.3;
+  cursor: grab;
+  font-size: 1.25rem;
+  color: #6b7280;
+  transition: opacity 0.2s;
+  user-select: none;
+}
+
+.tiptap [data-node-view-wrapper]:hover::before:hover {
+  opacity: 0.8;
+}
+
+.tiptap [data-node-view-wrapper]:hover::before:active {
+  cursor: grabbing;
+}
+
+.tiptap table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 2rem 0;
+  background: #1f2937;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tiptap table td,
+.tiptap table th {
+  border: 1px solid #374151;
+  padding: 14px 18px;
+  text-align: left;
+}
+
+.tiptap table td:first-child {
+  font-weight: 600;
+  color: white;
+  background: #1f2937;
+  width: 200px;
+}
+
+.tiptap table td:last-child {
+  color: #9ca3af;
+}
+
+.tiptap table th {
+  background: #374151;
+  font-weight: 600;
+  color: white;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: #6b7280;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.tiptap.prose {
+  max-width: none;
+}
+
+.tiptap ul,
+.tiptap ol {
+  padding-left: 1.5rem;
   margin-bottom: 1rem;
-  color: rgb(156, 163, 175);
+  color: #9ca3af;
+}
+
+.tiptap li {
+  margin-bottom: 0.5rem;
+}
+
+.tiptap strong {
+  color: white;
+  font-weight: 600;
+}
+
+.tiptap code {
+  background: #1f2937;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #f472b6;
+}
+
+.tiptap blockquote {
+  border-left: 4px solid #3b82f6;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #9ca3af;
+  font-style: italic;
 }
 
 /* Style Liveblocks comment threads for dark theme */
