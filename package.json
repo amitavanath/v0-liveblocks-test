@@ -14,6 +14,7 @@
     "@liveblocks/react": "latest",
     "@liveblocks/react-tiptap": "latest",
     "@liveblocks/react-ui": "latest",
+    "@radix-ui/react-label": "^2.0.2",
     "@tiptap/core": "latest",
     "@tiptap/extension-collaboration": "^2.25.0",
     "@tiptap/extension-collaboration-cursor": "^2.25.0",
